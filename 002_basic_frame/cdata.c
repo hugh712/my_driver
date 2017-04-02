@@ -36,9 +36,9 @@ static ssize_t hello_write(struct file *file, const char *buf, size_t count, lof
 	return 0;
 }
 
-static ssize_t hello_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigned long arg)
+static long hello_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
-	printk("hello_ioctl: cmd=%ld, arg=%ld\n", cmd, arg);
+	printk("hello_ioctl: cmd=%u, arg=%lu\n", cmd, arg);
 	return 0;
 }
 
@@ -48,7 +48,7 @@ static int __init hello_init(void)
 	printk(KERN_INFO "Hello Example Init debug mode is %s\n", 
 			debug_enable?"enabled":"disable");
 
-	ret=register_chrdev(HELLO_MAJOR, "hello1", &hello_fops);
+	ret=register_chrdev(HELLO_MAJOR, "cdata", &hello_fops);
 	if(ret < 0)
 	{
 		printk("Error registering hello device\n");
@@ -61,6 +61,7 @@ static int __init hello_init(void)
 static void __exit hello_exit(void)
 {
 	printk("Hello Example Exit\n");
+	unregister_chrdev(HELLO_MAJOR, "cdata");
 }
 
 struct file_operations hello_fops = {
