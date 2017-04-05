@@ -16,8 +16,21 @@ MODULE_PARM_DESC(debug_enable,"Enable module debug mode.");
 
 struct file_operations hello_fops;
 
+struct cdata_t{
+	int index;
+	wait_queue_head_t read_wait;
+	int wait=0;
+}cdata_t;
+
 static int hello_open(struct inode *inode, struct file *file)
 {
+	struct cdata_t *cdata;
+	
+	cdata = (struct cdata_t *)kmalloc(sizeof(struct cdata_t), GFP_KERNEL);
+	cdata->index=0;
+  init_waitqueue_head(&cdata->read_wait);
+	file->private_data=(void *)cdata;
+
 	printk("hello_open: successful\n");
 	return 0;
 }
@@ -46,10 +59,21 @@ static long hello_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 	return 0;
 }
 
-static unsigned int ldt_poll(struct file *file, poll_table *pt)
+static unsigned int hello_poll(struct file *file, poll_table *pt)
 {
-	unsigned int mask = 0;
-	poll_wait(file, ,pt);
+	unsigned int mask = POLLOUT;
+  printk(KERN_INFO "call hello_poll");
+	struct cdata_t *cdata=(struct cdata_t *)file->private_data;
+
+	poll_wait(file,cdata_t->read_wait ,pt);
+
+	if(cdata_t->wait==1)
+	{
+		mask|=POLLIN | POLLRDNORM; //readable
+	}
+
+	return mask;
+
 }
 
 static int __init hello_init(void)
