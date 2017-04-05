@@ -1,6 +1,7 @@
 /*
  * codes from embedded Linux Primer Second Edition
  */
+#include <linux/slab.h>
 #include <linux/module.h>
 #include <linux/fs.h>
 #include <linux/poll.h>
@@ -18,9 +19,9 @@ struct file_operations hello_fops;
 
 struct cdata_t{
 	int index;
+	int wait;
 	wait_queue_head_t read_wait;
-	int wait=0;
-}cdata_t;
+};
 
 static int hello_open(struct inode *inode, struct file *file)
 {
@@ -63,11 +64,13 @@ static unsigned int hello_poll(struct file *file, poll_table *pt)
 {
 	unsigned int mask = POLLOUT;
   printk(KERN_INFO "call hello_poll");
-	struct cdata_t *cdata=(struct cdata_t *)file->private_data;
+	struct cdata_t *cdata;
+	
+	cdata=(struct cdata_t *)file->private_data;
 
-	poll_wait(file,cdata_t->read_wait ,pt);
+	poll_wait(file,&cdata->read_wait ,pt);
 
-	if(cdata_t->wait==1)
+	if(cdata->wait==1)
 	{
 		mask|=POLLIN | POLLRDNORM; //readable
 	}
