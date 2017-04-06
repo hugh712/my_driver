@@ -7,4 +7,5 @@
 #define IOCTL_SYNC  _IO(0xD1, 2)
 #define IOCTL_NAME _IOW(0XDD, 3, int)
 #define IOCTL_WRITE _IOW(0XDE, 4, int)
+#define IOCTL_ENABLE _IOW(0XDF, 5, int)
 #endif
