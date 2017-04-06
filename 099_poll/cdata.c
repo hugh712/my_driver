@@ -63,9 +63,9 @@ static long hello_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 static unsigned int hello_poll(struct file *file, poll_table *pt)
 {
 	unsigned int mask = POLLOUT;
-  printk(KERN_INFO "call hello_poll");
 	struct cdata_t *cdata;
 	
+  printk(KERN_INFO "call hello_poll");
 	cdata=(struct cdata_t *)file->private_data;
 
 	poll_wait(file,&cdata->read_wait ,pt);
