@@ -5,15 +5,10 @@ KDIR := /lib/modules/$(KVERSION)/build
 PWD := $(shell pwd)
 
 
-
-#$(info 	$(MAKE) -C $(KDIR) SUBDIRS=$(PWD) modules)
-#$(info $(MAKE) $(DEBFLAGS) -C  /lib/modules/$(KVERSION)/build M=$(PWD) modules)
-
 default:
 	$(MAKE) -C $(KDIR) SUBDIRS=$(PWD) modules
 test: 
-	gcc -o main-loop main-loop.c
-	gcc -o control control.c
+	gcc -o test test.c
 load:
 	sudo sh load.cdata.sh
 unload:

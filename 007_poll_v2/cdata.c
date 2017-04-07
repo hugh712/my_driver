@@ -5,6 +5,8 @@
 #include <linux/module.h>
 #include <linux/fs.h>
 #include <linux/poll.h>
+#include <linux/interrupt.h>
+#include <linux/sched.h>
 #include "cdata_ioctl.h"
 
 #define dbg(fmt,args...) printk("[%s]:%d => "fmt,__FUNCTION__,__LINE__,##args)
@@ -16,7 +18,7 @@ module_param(debug_enable, int, 0);
 MODULE_PARM_DESC(debug_enable,"Enable module debug mode.");
 
 struct file_operations hello_fops;
-static int wait=0;
+//static int wait=0;
 
 struct cdata_t{
 	int index;
@@ -29,7 +31,11 @@ static int hello_open(struct inode *inode, struct file *file)
 	
 	cdata = (struct cdata_t *)kmalloc(sizeof(struct cdata_t), GFP_KERNEL);
 	cdata->index=0;
-  init_waitqueue_head(&cdata->read_wait);
+  
+	//init wait queue head
+	init_waitqueue_head(&cdata->read_wait);
+	
+	//assign cdata to fd.private_data	for keeping data
 	file->private_data=(void *)cdata;
 
 	printk("hello_open: successful\n");
@@ -38,6 +44,8 @@ static int hello_open(struct inode *inode, struct file *file)
 
 static int hello_release(struct inode *inode, struct file *file)
 {
+	struct cdata_t *cdata;
+	cdata=(struct cdata_t *)file->private_data;
 	printk("hello_release: successful\n");
 	return 0;
 }
@@ -57,16 +65,22 @@ static ssize_t hello_write(struct file *file, const char *buf, size_t count, lof
 static long hello_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
 	struct cdata_t *cdata;
+	DECLARE_WAITQUEUE(wait,current);
 	cdata=(struct cdata_t *)file->private_data;
 	printk("hello_ioctl: cmd=%u, arg=%lu\n", cmd, arg);
 
 	switch(cmd)
 	{
 		case IOCTL_ENABLE:
-			printk("set cdata->wait=1\n");
-			wait=1;
+			printk("IOCTL_ENABLE\n");
+			wake_up(&cdata->read_wait);
 		break;
-	
+		case IOCTL_DISABLE:
+			printk("IOCTL_DISABLE\n");
+			set_current_state(TASK_INTERRUPTIBLE);
+			add_wait_queue(&cdata->read_wait, &wait);
+			schedule();
+		break;	
 	}
 
 
@@ -84,12 +98,9 @@ static unsigned int hello_poll(struct file *file, poll_table *pt)
 	
 	poll_wait(file,&cdata->read_wait ,pt);
 
-	if(wait==1)
-	{
-  	printk(KERN_INFO "make mas readable\n");
-		mask = POLLIN | POLLRDNORM; //readable
-	}
-
+  printk(KERN_INFO "make mas readable\n");
+	mask = POLLIN | POLLRDNORM; //readable
+	
 	return mask;
 
 }
@@ -112,8 +123,9 @@ static int __init hello_init(void)
 
 static void __exit hello_exit(void)
 {
-	printk("Hello Example Exit\n");
 	unregister_chrdev(HELLO_MAJOR, "cdata");
+	printk("Hello Example Exit\n");
+	
 }
 
 struct file_operations hello_fops = {
