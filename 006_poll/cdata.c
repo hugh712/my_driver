@@ -12,11 +12,11 @@
 #define HELLO_MAJOR 234
 
 static int debug_enable=0;
+static int wait=0;
 module_param(debug_enable, int, 0);
 MODULE_PARM_DESC(debug_enable,"Enable module debug mode.");
 
 struct file_operations hello_fops;
-static int wait=0;
 
 struct cdata_t{
 	int index;

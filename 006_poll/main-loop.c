@@ -34,7 +34,7 @@ int main(int argc, char **argv)
 	while(1)
 	{
 	
-		ret = poll(&fds,sizeof(fds),1000);
+		ret = poll(&fds,sizeof(fds),2000);
 
 		if(ret==-1)
 		{
@@ -57,14 +57,6 @@ int main(int argc, char **argv)
 			break;
 		}
 	}//end of while
-
-		//send ioctl
-		ret=ioctl(fd,IOCTL_WRITE,"test");
-		if(ret < 0)
-		{
-			printf("ioctl_write failed:%d\n", ret);
-		}
-	
 
 		close(fd);
 		return 0;
