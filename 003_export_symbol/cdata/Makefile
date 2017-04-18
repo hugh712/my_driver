@@ -2,7 +2,7 @@ obj-m := cdata.o
 KVERSION := $(shell uname -r)
 SYMBOL_INC = $(obj)/../include
 EXTRA_CFLAGS+= -I $(SYMBOL_INC)
-KBUILD_EXTRA_SYMBOLS=$(obj)/../print/Module.symvers
+KBUILD_EXTRA_SYMBOLS=$(obj)/../add_sub/Module.symvers
 KDIR := /lib/modules/$(KVERSION)/build
 PWD := $(shell pwd)
 

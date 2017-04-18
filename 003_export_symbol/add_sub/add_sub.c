@@ -2,11 +2,11 @@
 #include <linux/module.h>
 #include "add_sub.h"
 
-long add_integer(long a, long b)
+int add_integer(int a, int b)
 {
 	return a+b;
 }
-long sub_integer(long a, long b)
+int sub_integer(int a, int b)
 {
 	return a-b;
 }
