@@ -6,7 +6,6 @@ static long a=1;
 static long b=1;
 static int AddOrSub=1;
 static int debug_enable=0;
-module_param(debug_enable, int, 0);
 MODULE_PARM_DESC(debug_enable,"Enable module debug mode.");
 
 static int __init hello_init(void)
@@ -41,6 +40,7 @@ module_exit(hello_exit);
 
 module_param(a,long,S_IRUGO);
 module_param(b,long,S_IRUGO);
+module_param(debug_enable, int, 0);
 module_param(AddOrSub,int,S_IRUGO);
 
 MODULE_AUTHOR("hugh");
