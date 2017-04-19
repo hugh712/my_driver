@@ -5,6 +5,8 @@
 #include <linux/fs.h>
 
 #define HELLO_MAJOR 234
+#define PTK(fmt,arg...)	\
+	printk(KERN_INFO "[HELLO]:" fmt"\n", ## arg)
 
 static int debug_enable=0;
 module_param(debug_enable, int, 0);
@@ -14,53 +16,59 @@ struct file_operations hello_fops;
 
 static int hello_open(struct inode *inode, struct file *file)
 {
-	printk("hello_open: successful\n");
+	PTK("open: successful");
+	PTK("open: major number by MAJOR  is %d", MAJOR(inode->i_rdev));
+	PTK("open: minor number by MINOR  is %d", MINOR(inode->i_rdev));
+	PTK("open: major number by imajor is %d", imajor(inode));
+	PTK("open: minor number by iminor is %d", iminor(inode));
+	PTK("open: use count is %d", module_refcount(THIS_MODULE));	
 	return 0;
 }
 
 static int hello_release(struct inode *inode, struct file *file)
 {
-	printk("hello_release: successful\n");
+	PTK("release: successful");
+	PTK("release: use count is %d", module_refcount(THIS_MODULE));	
 	return 0;
 }
 
 static ssize_t hello_read(struct file *file, char *bug, size_t count, loff_t *ptr)
 {
-	printk("hello_read: returning zero byte\n");
+	PTK("read: returning zero byte");
 	return 0;
 }
 
 static ssize_t hello_write(struct file *file, const char *buf, size_t count, loff_t *ppos)
 {
-	printk("hello_write: accepting zero bytes\n");
+	PTK("write: accepting zero bytes");
 	return 0;
 }
 
 static long hello_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
-	printk("hello_ioctl: cmd=%u, arg=%lu\n", cmd, arg);
+	PTK("ioctl: cmd=%u, arg=%lu", cmd, arg);
 	return 0;
 }
 
 static int __init hello_init(void)
 {
 	int ret;
-	printk(KERN_INFO "Hello Example Init debug mode is %s\n", 
+	PTK("init: Hello Example Init debug mode is %s", 
 			debug_enable?"enabled":"disable");
 
 	ret=register_chrdev(HELLO_MAJOR, "cdata", &hello_fops);
 	if(ret < 0)
 	{
-		printk("Error registering hello device\n");
+		PTK("init: Error registering hello device\n");
 		return ret;
 	}
-	printk("Hello: registered moule successfully!\n");
+	PTK("init: registered moule successfully!\n");
 	return 0;
 }
 
 static void __exit hello_exit(void)
 {
-	printk("Hello Example Exit\n");
+	PTK("Hello Example Exit\n");
 	unregister_chrdev(HELLO_MAJOR, "cdata");
 }
 

@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/ioctl.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include "cdata_ioctl.h"
@@ -26,24 +25,8 @@ int main(int argc, char **argv)
 	}
 	printf("%s: open: successful\n", argv[0]);
 
-	//Issue a read
-	rc=read(fd, rd_buf,0);
-	if(rc==-1)
-	{
-		perror("read failed");
-		close(fd);
-		exit(-1);
-	}
-
-	printf("%s: read: returning %d bytes!\n", argv[0], rc);
-
-	//send ioctl
-	ret=ioctl(fd,IOCTL_WRITE,"test");
-	if(ret < 0)
-	{
-		printf("ioctl_write failed:%d\n", ret);
-	}
-	
+while(1)
+{}	
 
 	close(fd);
 	return 0;
