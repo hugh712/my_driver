@@ -11,7 +11,6 @@ default:
 	$(MAKE) -C $(KDIR) SUBDIRS=$(PWD) modules
 test:
 	gcc -o test test.c
-	gcc -o test2 test2.c
 load:
 	sudo sh load.cdata.sh
 unload:

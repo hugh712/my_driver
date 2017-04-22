@@ -8,13 +8,10 @@
 #include <linux/mm.h> 
 #include <asm/io.h>
 #include <asm/uaccess.h>
-
+#include "cdata_ioctl.h"
 
 #define HELLO_MAJOR 234
 #define VIRTUALDISK_SIZE 0x2000
-#define MEM_CLEAR 0x1
-#define PORT1_SET 0x2
-#define PORT2_SET 0x3
 
 #define PTK(fmt,arg...)	\
 	printk(KERN_INFO "[HELLO]:" fmt"\n", ## arg)
@@ -68,6 +65,7 @@ static ssize_t hello_read(struct file *file, char *buf, size_t size, loff_t *ptr
 	int ret=0;
 	struct VirtualDisk *disk=(struct VirtualDisk*)file->private_data;
 
+	PTK("issue a read");
 	if(p>=VIRTUALDISK_SIZE)
 		return count ? - ENXIO:0;
 
@@ -88,23 +86,99 @@ static ssize_t hello_read(struct file *file, char *buf, size_t size, loff_t *ptr
 	return ret;
 }
 
-static ssize_t hello_write(struct file *file, const char *buf, size_t count, loff_t *ppos)
+static ssize_t hello_write(struct file *file, const char *buf, size_t size, loff_t *ppos)
 {
-	PTK("write: accepting zero bytes");
+	unsigned long p=*ppos;
+	unsigned int count=size;
+	int ret=0;
+	struct VirtualDisk *disk=(struct VirtualDisk*)file->private_data;
+
+	PTK("issue a write");
+	if(p>=VIRTUALDISK_SIZE)
+		return count ? - ENXIO:0;
+
+	if(count > VIRTUALDISK_SIZE - p)
+		count = VIRTUALDISK_SIZE - p;
+	
+	if(copy_from_user(disk->mem + p,buf,count))
+	{
+		ret = -EFAULT;
+	}
+	else
+	{
+		*ppos+=count;
+		ret=count;
+		PTK("written %d byte(s) from %ld\n", count,p);
+	}
+
+	return ret;
+
 	return 0;
 }
 
 static loff_t hello_llseek(struct file *file, loff_t offset, int orig)
 {
 	loff_t ret =0;
-	PTK("write: accepting zero bytes");
+	
+	PTK("issue a lseek");
+	switch(orig)
+	{
+		case SEEK_SET:
+			if(offset < 0)
+			{
+				ret= - EINVAL;
+				break;
+			}
+			if((unsigned int)offset > VIRTUALDISK_SIZE)
+			{
+				ret= -EINVAL;
+				break;
+			}
+			file->f_pos=(unsigned int)offset;
+			ret=file->f_pos;
+		break;
+		case SEEK_CUR:
+			if(file->f_pos > VIRTUALDISK_SIZE)
+			{
+				ret= -EINVAL;
+				break;
+			}
+			if((file->f_pos + offset) < 0)
+			{
+				ret = - EINVAL;
+				break;
+			}
+			file->f_pos+=offset;
+			ret=file->f_pos;
+			break;
+	}
+	
 	return ret;
 }
 
 
 static long hello_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
-	PTK("ioctl: cmd=%u, arg=%lu", cmd, arg);
+	struct VirtualDisk *disk=(struct VirtualDisk*)file->private_data;
+	
+	switch(cmd)
+	{
+		case MEM_CLEAR:
+			PTK("MEM_CLEAR");
+			memset(disk->mem, 0, VIRTUALDISK_SIZE);
+			break;
+		case PORT1_SET:
+			PTK("PORT1_SET");
+			disk->port1=0;
+			break;
+		case PORT2_SET:
+			PTK("PORT2_SET");
+			disk->port2=0;
+			break;
+		default:
+			return - EINVAL;
+	}
+	
 	return 0;
 }
 
