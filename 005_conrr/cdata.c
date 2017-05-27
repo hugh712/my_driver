@@ -81,7 +81,7 @@ long cdata_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		case IOCTL_WRITE:
       		PTK("hugh cdata: in ioctl: IOCTL_WRITE");
 					PTK("cdata->buf=%s, arg=%s", cdata->buf, (char*)arg);
-					//strcpy(cdata->buf, (char*)arg);
+					strcpy(cdata->buf, (char*)arg);
 					break;
 		default:
       		PTK("hugh cdata: ioctl default");

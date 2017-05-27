@@ -16,7 +16,7 @@ int main(void)
 
 		//get host name via unistd.h
     gethostname(hostname, 128);
-		printf("hostname=%s", hostname);
+		printf("hostname=%s\n", hostname);
 		
 		//fork a child
     child = fork();
@@ -43,7 +43,7 @@ int main(void)
     if (ret_val < 0) {
    	 printf ("ioctl_write failed:%d\n", ret_val);
     }
-    
+	return 0;    
     //2. print device name via IOCTL_SYNC
     ret_val = ioctl(fd, IOCTL_SYNC, 0);
     if (ret_val < 0) {
