@@ -17,7 +17,7 @@ fi
 #retrieve major number
 #major=$(awk "\$2==\"$module\" {print \$1}" /proc/devices)
 
-major=121
+major=234
 echo "major number= $major"
 
 
