@@ -1,1 +1,0 @@
-cmd_/home/hugh/mymy/my_github/my_driver/005_conrr/cdata.ko := ld -r -m elf_x86_64 -T ./scripts/module-common.lds --build-id  -o /home/hugh/mymy/my_github/my_driver/005_conrr/cdata.ko /home/hugh/mymy/my_github/my_driver/005_conrr/cdata.o /home/hugh/mymy/my_github/my_driver/005_conrr/cdata.mod.o
