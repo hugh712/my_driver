@@ -13,30 +13,26 @@
 #include <linux/miscdevice.h>
 #include <linux/input.h>
 #include <linux/platform_device.h>
-//#include <linux/config.h>
-//#include <linux/queue.h>
 #include <asm/io.h>
 #include <asm/uaccess.h>
-//#include <asm/hardware.h>
 
 #include "cdata_ioctl.h"
 
 #define CDATA_MAJOR 122
 #define CDATA_MINOR 199
+#define PTK(fmt,arg...) \
+	  printk(KERN_INFO "[HELLO]:" fmt"\n", ## arg)
 
 static int cdata_open(struct inode *inode, struct file * filp)
 {
-
-	printk(KERN_ALERT "cdata, hugh in open\n");
-
+	PTK("cdata, hugh in open");
 
 	return 0;
 }
 
 static int cdata_release(struct inode *inode, struct file * filp)
 {
-
-	printk(KERN_ALERT "cdata, hugh in rlease");
+	PTK("cdata, hugh in rlease");
 
 	return 0;
 }
@@ -44,7 +40,7 @@ static int cdata_release(struct inode *inode, struct file * filp)
 static long cdata_ioctl (struct file *filp, unsigned int cmd, unsigned long data)
 {
 
-	printk(KERN_ALERT "cdata, hugh in ioctl");
+	PTK("cdata, hugh in ioctl");
 
 
 	switch(cmd)
@@ -52,7 +48,7 @@ static long cdata_ioctl (struct file *filp, unsigned int cmd, unsigned long data
 
 
 	  default:
-		printk(KERN_ALERT "cdata: ioctl default");
+		PTK("cdata: ioctl default");
 		return -ENOTTY; 	
 
 	}//end of switch
@@ -78,7 +74,7 @@ static int ldt_plat_probe(struct platform_device *pdev)
 {
 	if(misc_register(&cdata_misc) <0)
 	{
-		printk(KERN_INFO "CDATA: can't register driver\n");
+		PTK("CDATA: can't register driver");
         	return -1;
 	}
 	return 0;
@@ -101,26 +97,26 @@ static struct platform_driver ldt_plat_driver = {
 };
 
 
-int cdata_fb_init_module(void)
+int cdata_init_module(void)
 {
 
 	platform_driver_register(&ldt_plat_driver);
-	printk (KERN_ALERT "cdata module: registered.\n");
+	PTK("cdata module: registered.");
 
     	return 0;
 }
 
-void  cdata_fb_cleanup_module(void)
+void  cdata_cleanup_module(void)
 {
 
 
 	platform_driver_unregister(&ldt_plat_driver);
-  	printk (KERN_ALERT "cdata module: unregisterd.\n");
+  PTK("cdata module: unregisterd.");
 
 }
 
 
-module_init(cdata_fb_init_module);
-module_exit(cdata_fb_cleanup_module);
+module_init(cdata_init_module);
+module_exit(cdata_cleanup_module);
 
 MODULE_LICENSE("GPL");
