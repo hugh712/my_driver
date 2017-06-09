@@ -147,10 +147,10 @@ static void __exit hello_exit(void)
 	kobject_del(&kobj1);
 	
 	PTK("kobject - 2 exit");
-	kobject_del(&kobj1);
+	kobject_del(&kobj2);
 
 	PTK("kobject - 3 exit");
-	kobject_del(&kobj1);
+	kobject_del(&kobj3);
 
 	PTK("mytest_bus exit");
 	bus_unregister(&mytest_bus_type);
