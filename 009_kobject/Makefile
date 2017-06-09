@@ -1,22 +1,16 @@
-obj-m := cdata.o
+obj-m := kobj.o
+obj-m := misc_test.o
 KVERSION := $(shell uname -r)
-DEVICE="cdata"
 KDIR := /lib/modules/$(KVERSION)/build
 PWD := $(shell pwd)
 
-#$(info 	$(MAKE) -C $(KDIR) SUBDIRS=$(PWD) modules)
-#$(info $(MAKE) $(DEBFLAGS) -C  /lib/modules/$(KVERSION)/build M=$(PWD) modules)
-
 default:
 	$(MAKE) -C $(KDIR) SUBDIRS=$(PWD) modules
-test:
-	gcc -o test test.c
-	gcc -o test2 test2.c
 load:
-	sudo sh load.cdata.sh
+	sudo sh load.sh
 unload:
-	sudo sh unload.cdata.sh
+	sudo sh unload.sh
 clean:
-	rm -rf *.o *.ko .*cmd modules.* Module.* .tmp_versions *.mod.c test test2
+	rm -rf *.o *.ko .*cmd modules.* Module.* .tmp_versions *.mod.c
 show:
 	ls -l /dev/$(DEVICE); lsmod | grep $(DEVICE)
