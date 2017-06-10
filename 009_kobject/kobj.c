@@ -15,10 +15,28 @@ void kobject_release(struct kobject *kobject);
 ssize_t kobject_show(struct kobject *kobject, struct attribute *attr, char *buf);
 ssize_t kobject_store(struct kobject *kobject, struct attribute *attr,const char *buf, size_t count);
 
-static int debug_enable=0;
+struct kobject kobj_Parent;
 struct kobject kobj1;
-struct kobject kobj2;
-struct kobject kobj3;
+struct kobject *kobj2;
+struct kobject *kobj3;
+struct kset *kset1;
+struct kset kset2;
+
+
+//for kset
+
+static int mykset_uevent_filter(struct kset *kset, struct kobject *kobj)
+{
+//	struct kobj_type *ktype = get_ktype(kobj);
+
+	return 0;
+}
+
+static const struct kset_uevent_ops mykset_uevent_ops = {
+	.filter = mykset_uevent_filter,
+};
+
+
 
 //for attribute
 struct attribute attr1 = {
@@ -29,7 +47,7 @@ struct attribute attr2 = {
 	.name = "kobject_type2",
 	.mode = S_IRWXUGO,
 };
-struct attribute attr2 = {
+struct attribute attr3 = {
 	.name = "kobject_type3",
 	.mode = S_IRWXUGO,
 };
@@ -48,19 +66,6 @@ static struct attribute *def_attrs3[]={
 	NULL,
 };
 
-/*
-*    for bus
-*		 for bus
-*/
-struct bus_type mytest_bus_type = {
-	.name		= "hugh_bus",
-	.match		= hugh_bus_match,
-	.probe		= hugh_bus_probe,
-	.remove		= hugh_bus_remove,
-	.suspend	= hugh_bus_suspend,
-	.resume		= hugh_bus_resume,
-	.shutdown	= hugh_bus_shutdown,
-};
 
 static int hugh_bus_match(struct device *_dev, struct device_driver *_drv)
 {
@@ -69,11 +74,13 @@ static int hugh_bus_match(struct device *_dev, struct device_driver *_drv)
 }
 
 static int hugh_bus_probe(struct device *dev)
+{
 	PTK("call bus probe");
 	return 0;
 }
 
 static int hugh_bus_remove(struct device *dev)
+{
 	PTK("call bus remove");
 	return 0;
 }
@@ -87,13 +94,27 @@ static int hugh_bus_suspend(struct device *dev, pm_message_t state)
 static int hugh_bus_resume(struct device *dev)
 {
 	PTK("call bus resume");
-	return;
+	return 0;
 }
 
 static void hugh_bus_shutdown(struct device *dev)
 {
 	PTK("call bus shutdown");
 }
+
+/*
+*    for bus
+*		 for bus
+*/
+struct bus_type mytest_bus_type = {
+	.name		= "hugh_bus",
+	.match		= hugh_bus_match,
+	.probe		= hugh_bus_probe,
+	.remove		= hugh_bus_remove,
+	.suspend	= hugh_bus_suspend,
+	.resume		= hugh_bus_resume,
+	.shutdown	= hugh_bus_shutdown,
+};
 
 /*
 *			for k object
@@ -125,33 +146,43 @@ struct kobj_type ktype3={
 
 static int __init hello_init(void)
 {
-	
+
 	PTK("bus register");
 	bus_register(&mytest_bus_type);	
 
+	PTK("kset1 register");
+	kset1=kset_create_and_add("kset1",&mykset_uevent_ops,&kobj_Parent);
+
 	PTK("kobject-1 init");
 	kobject_init_and_add(&kobj1, &ktype1, NULL, "kobject-1");
+	kobj1.kset = kset1;	
 
+/*
 	PTK("kobject-2 init");
-	ret=kobject_init_and_add(&kobj2, &ktype2, NULL, "kobject-2");
+	kobject_init_and_add(kobj2, &ktype2, NULL, "kobject-2");
 	
 	PTK("kobject-3 init");
-	ret=kobject_init_and_add(&kobj3, &ktype3, NULL, "kobject-3");
-
+	kobject_init_and_add(kobj3, &ktype3, NULL, "kobject-3");
+*/
 	return 0;
 }
 
 static void __exit hello_exit(void)
 {
+
+	PTK("kset - 1 exit");
+	kset_unregister(kset1);	
+
 	PTK("kobject - 1 exit");
 	kobject_del(&kobj1);
-	
+
+/*	
 	PTK("kobject - 2 exit");
-	kobject_del(&kobj2);
+	kobject_del(kobj2);
 
 	PTK("kobject - 3 exit");
-	kobject_del(&kobj3);
-
+	kobject_del(kobj3);
+*/
 	PTK("mytest_bus exit");
 	bus_unregister(&mytest_bus_type);
 }
