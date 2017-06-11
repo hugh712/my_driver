@@ -13,4 +13,4 @@ unload:
 clean:
 	rm -rf *.o *.ko .*cmd modules.* Module.* .tmp_versions *.mod.c
 show:
-	sudo find /sys -name \*kobj* -o -name \*misc_test*
+	sudo find /sys -name \*kobj* -o -name \*misc_test* -o -name \*kset* -o -name \*hugh*
