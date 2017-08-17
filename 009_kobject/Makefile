@@ -1,5 +1,5 @@
 obj-m := kobj.o
-obj-m := misc_test.o
+obj-m += misc_test.o
 KVERSION := $(shell uname -r)
 KDIR := /lib/modules/$(KVERSION)/build
 PWD := $(shell pwd)
@@ -13,4 +13,4 @@ unload:
 clean:
 	rm -rf *.o *.ko .*cmd modules.* Module.* .tmp_versions *.mod.c
 show:
-	ls -l /dev/$(DEVICE); lsmod | grep $(DEVICE)
+	sudo find /sys -name \*kobj* -o -name \*misc_test* -o -name \*kset* -o -name \*hugh*
