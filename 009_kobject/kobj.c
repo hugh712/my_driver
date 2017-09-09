@@ -27,8 +27,22 @@ static int mykset_uevent_filter(struct kset *kset, struct kobject *kobj)
 	return 0;
 }
 
+static int kset_uevent (struct kset *kset, struct kobject *kobj, struct kobj_uevent_env *env)
+{
+	int i=0;
+	PTK("uevent: kobj %s. \n", kobj->name);
+
+	while (i < env->envp_idx)
+	{
+		PTK("%s. \n", env->envp[i]);
+		i++;
+	}
+	return 0;
+}
+
 static const struct kset_uevent_ops mykset_uevent_ops = {
 	.filter = mykset_uevent_filter,
+	.uevent = kset_uevent,
 };
 
 //for attribute
