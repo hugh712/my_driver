@@ -26,58 +26,48 @@ struct block_device_operations simp_blkdev_fops = {
 
 static int simp_blkdev_make_request(struct request_queue *q, struct bio *bio)
 {
-    struct bio_vec *bvec;
-    int i;
+    struct bio_vec bvec;
+    struct bvec_iter iter;
     void *dsk_mem;
 
-    if ((bio->bi_sector << 9) + bio->bi_size > SIMP_BLKDEV_BYTES)
+    if ((bio->bi_iter.bi_sector << 9) + bio->bi_iter.bi_size > SIMP_BLKDEV_BYTES)
     {
-        printk(KERN_ERR SIMP_BLKDEV_DISKNAME ":bad request:block=%llu, count=%u\n", (unsigned long long)bio->bi_sector, bio->bi_size);
+        printk(KERN_ERR SIMP_BLKDEV_DISKNAME ":bad request:block=%llu, count=%u\n", (unsigned long long)bio->bi_iter.bi_sector, bio->bi_iter.bi_size);
         
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 24)
-        bio_endio(bio, 0, 1);
-#else
-        bio_endio(bio, 1);
-#endif
+        bio_endio(bio);
         return 0;
     }
 
-    dsk_mem = simp_blkdev_data + (bio->bi_sector << 9);
+    dsk_mem = simp_blkdev_data + (bio->bi_iter.bi_sector << 9);
     
-    bio_for_each_segment(bvec, bio, i)
+    bio_for_each_segment(bvec, bio, iter)
     {
+	
         void *iovec_mem;
         
         switch (bio_rw(bio))
         {
         case READ:
         case READA:
-            iovec_mem = kmap(bvec->bv_page) + bvec->bv_offset;
-            memcpy(iovec_mem, dsk_mem, bvec->bv_len);
-            kunmap(bvec->bv_page);
+            iovec_mem = kmap(bvec.bv_page) + bvec.bv_offset;
+            memcpy(iovec_mem, dsk_mem, bvec.bv_len);
+            kunmap(bvec.bv_page);
             break;
         
         case WRITE:
-            iovec_mem = kmap(bvec->bv_page) + bvec->bv_offset;
-            memcpy(dsk_mem, iovec_mem, bvec->bv_len);
-            kunmap(bvec->bv_page);
+            iovec_mem = kmap(bvec.bv_page) + bvec.bv_offset;
+            memcpy(dsk_mem, iovec_mem, bvec.bv_len);
+            kunmap(bvec.bv_page);
             break;
         default:
-            printk(KERN_ERR SIMP_BLKDEV_DISKNAME ":unknown value of bio_rw:%lu\n", bio_rw(bio));
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 24)
-            bio_endio(bio, 0, 0);
-#else
-            bio_endio(bio, 0);
-#endif
+            printk(KERN_ERR SIMP_BLKDEV_DISKNAME ":unknown value of bio_rw:%llu\n", bio_rw(bio));
+            bio_endio(bio);
             return 0;
         }
-        dsk_mem += bvec->bv_len;
+        dsk_mem += bvec.bv_len;
+		
     }
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 24)
-    bio_endio(bio, 0, 0);
-#else
-    bio_endio(bio, 0);
-#endif
+    bio_endio(bio);
     return 0;
 }
 
