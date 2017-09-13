@@ -1,4 +1,4 @@
-obj-m := block.o
+obj-m := myblock.o
 KVERSION := $(shell uname -r)
 KDIR := /lib/modules/$(KVERSION)/build
 PWD := $(shell pwd)
