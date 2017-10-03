@@ -87,6 +87,7 @@ static void sbull_transfer(struct sbull_dev *dev, unsigned long sector,
 	unsigned long offset = sector*KERNEL_SECTOR_SIZE;
 	unsigned long nbytes = nsect*KERNEL_SECTOR_SIZE;
 
+	printk (KERN_NOTICE "in sbull transfer\n");
 	if ((offset + nbytes) > dev->size) {
 		printk (KERN_NOTICE "Beyond-end write (%ld %ld)\n", offset, nbytes);
 		return;
@@ -104,6 +105,7 @@ static void sbull_request(struct request_queue *q)
 {
 	struct request *req;
 
+	printk (KERN_NOTICE "in sbull request\n");
 	while ((req = blk_fetch_request(q)) != NULL) {
 		struct sbull_dev *dev = req->rq_disk->private_data;
 		if (req->cmd_type != REQ_TYPE_FS) {
@@ -132,6 +134,7 @@ static int sbull_xfer_bio(struct sbull_dev *dev, struct bio *bio)
 	struct bio_vec bvec;
 	sector_t sector = bio->bi_iter.bi_sector;
 
+	printk (KERN_NOTICE "in sbull xfer_bio\n");
 	/* Do each segment independently. */
 	bio_for_each_segment(bvec, bio, iter) {
 		char *buffer = __bio_kmap_atomic(bio, iter);
@@ -151,6 +154,7 @@ static int sbull_xfer_request(struct sbull_dev *dev, struct request *req)
 	struct bio *bio;
 	int nsect = 0;
     
+	printk (KERN_NOTICE "in sbull xfer_request\n");
 	__rq_for_each_bio(bio, req) {
 		sbull_xfer_bio(dev, bio);
 		nsect += bio->bi_iter.bi_size/KERNEL_SECTOR_SIZE;
@@ -169,6 +173,7 @@ static void sbull_full_request(struct request_queue *q)
 	int sectors_xferred;
 	struct sbull_dev *dev = q->queuedata;
 
+	printk (KERN_NOTICE "in sbull full_request\n");
 	while ((req = blk_fetch_request(q)) != NULL) {
 		if (req->cmd_type != REQ_TYPE_FS) {
 			printk (KERN_NOTICE "Skip non-fs request\n");
@@ -190,6 +195,7 @@ static void sbull_make_request(struct request_queue *q, struct bio *bio)
 	struct sbull_dev *dev = q->queuedata;
 	int status;
 
+	printk (KERN_NOTICE "in sbull make_request\n");
 	status = sbull_xfer_bio(dev, bio);
 	bio_endio(bio);
 }
@@ -203,6 +209,7 @@ static int sbull_open(struct block_device *bdev, fmode_t mode)
 {
 	struct sbull_dev *dev = bdev->bd_disk->private_data;
 
+	printk (KERN_NOTICE "in sbull open\n");
 	del_timer_sync(&dev->timer);
 	//filp->private_data = dev;
 	spin_lock(&dev->lock);
