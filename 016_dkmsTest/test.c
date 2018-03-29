@@ -6,21 +6,21 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include "cdata_ioctl.h"
+#include "src/cdata_ioctl.h"
 
 int main(int argc, char **argv)
 {
 	//file descriptor
 	int fd;
 	int rc=0;
-	char *rd_buf[200];
+	char rd_buf[200];
 	char *harry="Harry Potter is The Boy Who Lived, singled out by Lord Voldemort at birth to be his greatest rival, and our hero";
 	int ret;
 	printf("%s: entered\n", argv[0]);
 	
 	printf("origin string=%s\n", harry);
 	
-	memset(rd_buf,"\0",strlen(rd_buf));
+	memset(rd_buf,'\0',strlen(rd_buf));
 	//open the device
 	fd=open("/dev/cdata", O_RDWR);
 	if (fd==-1)
