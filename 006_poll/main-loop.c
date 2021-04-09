@@ -34,7 +34,7 @@ int main(int argc, char **argv)
 	while(1)
 	{
 	
-		ret = poll(&fds,sizeof(fds),2000);
+		ret = poll(&fds,sizeof(fds)/sizeof(struct pollfd),2000);
 
 		if(ret==-1)
 		{
